@@ -2,19 +2,22 @@ FROM openshift/redhat-openjdk18-openshift:1.2
 
 USER root
 
+ENV \
+    EL_HOME=$APP_ROOT/elasticsearch-$EL_VERSION
+
 RUN \
     set -e ; \
-    mkdir /opt/app-root ;\
-    curl -Lo /tmp/elasticsearch-2.4.6.zip https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/2.4.6/elasticsearch-2.4.6.zip ; \
-	unzip -o -d /opt/app-root /tmp/elasticsearch-2.4.6.zip
+    mkdir ${APP_ROOT} ;\
+    curl -Lo /tmp/elasticsearch.zip https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/${EL_VERSION}/elasticsearch-${EL_VERSION}.zip ; \
+	unzip -o -d ${APP_ROOT} /tmp/elasticsearch.zip
 
 RUN useradd -r elastic
 
-RUN chown -R elastic /opt/app-root ; \
-	chgrp -R 0 /opt/app-root ; \
-	chmod -R g+rw /opt/app-root ; \
-	chmod 775 /opt/app-root/elasticsearch-2.4.6/bin/elasticsearch
+RUN chown -R elastic ${APP_ROOT} ; \
+	chgrp -R 0 ${APP_ROOT} ; \
+	chmod -R g+rw ${APP_ROOT} ; \
+	chmod 775 ${EL_HOME}/bin/elasticsearch
 
 USER elastic
 
-CMD [ "/opt/app-root/elasticsearch-2.4.6/bin/elasticsearch"]
+CMD [ "${EL_HOME}/bin/elasticsearch"]

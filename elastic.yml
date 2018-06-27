@@ -6,6 +6,9 @@ parameters:
 - name: APP_NAME
   required: true
   value: elasticsearch24
+- name: EL_VERSION
+  description: Elasticsearch version
+  value: '2.4.6'  
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -48,6 +51,11 @@ objects:
         name: ${APP_NAME}:latest
     strategy:
       dockerStrategy:
+        env:
+        - name: EL_VERSION
+          value: ${EL_VERSION}
+        - name: APP_ROOT
+          value: /opt/app-root/
         from:
           kind: ImageStreamTag
           name: redhat-openjdk18-openshift:1.2
