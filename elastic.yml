@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: elasticsearch24
+parameters:
+- name: APP_NAME
+  required: true
+  value: elasticsearch24
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - from:
+        kind: DockerImage
+        name: ${APP_NAME}:latest
+      name: latest
+      referencePolicy:
+        type: ""
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    resources:
+      limits:
+        memory: 512Mi
+        cpu: 500m
+      requests:
+        memory: 256Mi
+        cpu: 200m
+    source:
+      type: Binary
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APP_NAME}:latest
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: redhat-openjdk18-openshift:1.2
+          namespace: openshift
+      type: docker  
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    replicas: 1
+    selector:
+      name: ${APP_NAME}
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: ${APP_NAME}
+          name: ${APP_NAME}
+      spec:
+        containers:
+        - env:
+          - name: "CLUSTER_NAME"
+            value: "myesdb"
+          - name: "NUMBER_OF_MASTERS"
+            value: "2"
+          - name: NODE_MASTER
+            value: "true"
+          - name: NODE_DATA
+            value: "false"
+          - name: HTTP_ENABLE
+            value: "false"
+          - name: ES_HEAP_SIZE
+            value: "256m"
+          - name: "DISCOVERY_SERVICE"
+            value: "${APP_NAME}-discovery"
+          image: ''
+          imagePullPolicy: IfNotPresent
+          name: ${APP_NAME}
+          ports:
+          - containerPort: 9200
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /data
+            name: elastic-storage
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        volumes:
+        - name: elastic-storage
+          persistentVolumeClaim:
+            claimName: elastic-storage
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APP_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${APP_NAME}:latest
+      type: ImageChange        
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    ports:
+    - name: ${APP_NAME}
+      port: 9200
+      protocol: TCP
+      targetPort: 9200
+    selector:
+      name: ${APP_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: elastic-storage
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
