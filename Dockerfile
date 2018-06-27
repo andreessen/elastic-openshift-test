@@ -10,10 +10,17 @@ RUN \
 
 RUN useradd -r elastic
 
+RUN ls -la /opt/app-root
+
+RUN ls -la /opt/app-root/bin
+
 RUN chown -R elastic /opt/app-root ; \
 	chgrp -R 0 /opt/app-root ; \
-	chmod -R g+rw /opt/app-root ; \
-	chmod 775 /opt/app-root/bin/elasticsearch
+	chmod -R g+rw /opt/app-root
+
+RUN ls -la /opt/app-root
+
+RUN ls -la /opt/app-root/bin	
 
 USER elastic
 
