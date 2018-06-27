@@ -1,7 +1,5 @@
 FROM openshift/redhat-openjdk18-openshift:1.2
 
-RUN chown -R 1001:0 /opt && chown -R 1001:0 $HOME && \
-    chmod -R ug+rwX /opt
 
 RUN \
     set -e ; \
