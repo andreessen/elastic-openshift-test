@@ -10,6 +10,7 @@ RUN \
     mkdir ${APP_ROOT} ;\
     curl -Lo /tmp/elasticsearch.zip https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/${EL_VERSION}/elasticsearch-${EL_VERSION}.zip ; \
 	unzip -o -d ${APP_ROOT} /tmp/elasticsearch.zip ; \
+	mkdir -p ${EL_HOME} ;\
 	mv ${APP_ROOT}/elasticsearch-$EL_VERSION/* ${EL_HOME}
 
 RUN useradd -r elastic

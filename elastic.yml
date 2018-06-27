@@ -55,7 +55,7 @@ objects:
         - name: EL_VERSION
           value: ${EL_VERSION}
         - name: APP_ROOT
-          value: /opt/app-root/
+          value: /opt/app-root
         from:
           kind: ImageStreamTag
           name: redhat-openjdk18-openshift:1.2
