@@ -38,7 +38,10 @@ objects:
         memory: 256Mi
         cpu: 200m
     source:
-      type: Binary
+      contextDir: /
+      git:
+        uri: https://github.com/andreessen/elastic-openshift-test
+      type: Git
     output:
       to:
         kind: ImageStreamTag
